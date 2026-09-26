@@ -214,6 +214,12 @@ object AppConfig {
     const val MSG_SUB_UPDATE_START = 8
     const val MSG_SUB_UPDATE_CANCEL = 81
 
+    /**
+     * Servers, subscriptions or test results changed away from the main screen, which reloads them;
+     * content is the ID of the subscription, or empty for several.
+     */
+    const val MSG_SERVERS_CHANGED = 9
+
     /** Notification channel IDs and names. */
     // Use a new ID because Android does not let an app raise an existing channel's importance.
     const val RAY_NG_CHANNEL_ID = "CORE_M_CH_ID_V2"

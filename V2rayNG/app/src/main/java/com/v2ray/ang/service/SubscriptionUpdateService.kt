@@ -15,6 +15,7 @@ import com.v2ray.ang.extension.serializable
 import com.v2ray.ang.handler.AngConfigManager
 import com.v2ray.ang.handler.AppLocaleManager
 import com.v2ray.ang.handler.MmkvManager
+import com.v2ray.ang.helper.MessageHelper
 import com.v2ray.ang.helper.NotificationHelper
 import com.v2ray.ang.util.LogUtil
 import kotlinx.coroutines.CompletableDeferred
@@ -118,42 +119,50 @@ class SubscriptionUpdateService : Service() {
         }
 
         val sub = SubscriptionCache(subId, subItem)
+        // Whether the configs of the subscription or their test results changed, also by work that was then cancelled
+        var changed = false
+        try {
+            LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: Updating ${subItem.remarks}")
+            showNotification(
+                context = this,
+                titleResId = R.string.title_pref_auto_update_subscription,
+                content = getString(R.string.subscription_update_updating, subItem.remarks)
+            )
 
-        LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: Updating ${subItem.remarks}")
-        showNotification(
-            context = this,
-            titleResId = R.string.title_pref_auto_update_subscription,
-            content = getString(R.string.subscription_update_updating, subItem.remarks)
-        )
-
-        if (forcedUpdate || MmkvManager.decodeSettingsBool(AppConfig.PREF_UPDATE_SUBSCRIPTION, false)) {
-            AngConfigManager.updateConfigViaSub(sub)
-        }
-
-        if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION, false)) {
-            testSubscriptionServers(sub)
-
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)) {
-                LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: removing invalid servers for ${subItem.remarks}")
-                showNotification(
-                    context = this,
-                    titleResId = R.string.title_del_invalid_config,
-                    content = subItem.remarks
-                )
-                AngConfigManager.removeInvalidServer(subId)
+            if (forcedUpdate || MmkvManager.decodeSettingsBool(AppConfig.PREF_UPDATE_SUBSCRIPTION, false)) {
+                changed = AngConfigManager.updateConfigViaSub(sub).configCount > 0
             }
-            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)) {
-                LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: sorting servers for ${subItem.remarks}")
-                showNotification(
-                    context = this,
-                    titleResId = R.string.title_sort_by_test_results,
-                    content = subItem.remarks
-                )
-                AngConfigManager.sortByTestResultsForSub(subId)
-            }
-        }
 
-        LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: Finished ${subItem.remarks}")
+            if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_TEST_AFTER_UPDATE_SUBSCRIPTION, false)) {
+                // The test saves each result as it comes
+                changed = true
+                testSubscriptionServers(sub)
+
+                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_REMOVE_INVALID_AFTER_TEST, false)) {
+                    LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: removing invalid servers for ${subItem.remarks}")
+                    showNotification(
+                        context = this,
+                        titleResId = R.string.title_del_invalid_config,
+                        content = subItem.remarks
+                    )
+                    AngConfigManager.removeInvalidServer(subId)
+                }
+                if (MmkvManager.decodeSettingsBool(AppConfig.PREF_AUTO_SORT_AFTER_TEST, false)) {
+                    LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: sorting servers for ${subItem.remarks}")
+                    showNotification(
+                        context = this,
+                        titleResId = R.string.title_sort_by_test_results,
+                        content = subItem.remarks
+                    )
+                    AngConfigManager.sortByTestResultsForSub(subId)
+                }
+            }
+
+            LogUtil.i(AppConfig.TAG, "SubscriptionUpdateService: Finished ${subItem.remarks}")
+        } finally {
+            // The main screen reloads what it shows of the subscription
+            if (changed) MessageHelper.sendMsg2UI(this, AppConfig.MSG_SERVERS_CHANGED, subId)
+        }
     }
 
     private suspend fun testSubscriptionServers(sub: SubscriptionCache) {
