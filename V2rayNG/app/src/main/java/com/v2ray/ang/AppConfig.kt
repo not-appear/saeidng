@@ -151,7 +151,7 @@ object AppConfig {
     const val GITHUB_RAW_URL = "https://raw.githubusercontent.com"
     const val GITHUB_DOWNLOAD_URL = "$GITHUB_URL/%s/releases/latest/download"
     const val ANDROID_PACKAGE_NAME_LIST_URL = "$GITHUB_RAW_URL/2dust/androidpackagenamelist/master/proxy.txt"
-    const val APP_URL = "$GITHUB_URL/patterniha/PattNG"
+    const val APP_URL = "$GITHUB_URL/not-appear/saeidng"
     const val APP_API_URL = "https://api.github.com/repos/not-appear/saeidng/releases"
     const val APP_ISSUES_URL = "$APP_URL/issues"
     const val AETHER_URL = "$GITHUB_URL/CluvexStudio/aether"

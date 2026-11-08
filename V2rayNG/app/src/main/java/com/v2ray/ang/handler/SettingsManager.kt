@@ -43,6 +43,27 @@ object SettingsManager {
         initRoutingRulesets(context)
         migrateServerListToSubscriptions()
         migrateHysteria2PinSHA256()
+        migrateSaeidNgIranDefaults()
+    }
+
+    /**
+     * SaeidNG: one-time application of the Iran-tuned defaults on existing installs
+     * (fresh installs already get them from the regular defaults). Deliberately does
+     * not touch FakeDNS or routeOnly: in this fork they are a designed pair (FakeDNS
+     * on, routeOnly off), and it does not touch routing rulesets, which are already
+     * seeded with the Iran whitelist preset when empty.
+     */
+    private fun migrateSaeidNgIranDefaults() {
+        val migrationKey = "saeidng_iran_defaults_v1"
+        if (MmkvManager.decodeSettingsBool(migrationKey, false)) {
+            return
+        }
+        MmkvManager.encodeSettings(AppConfig.PREF_REMOTE_DNS, AppConfig.DNS_PROXY)
+        MmkvManager.encodeSettings(AppConfig.PREF_DOMESTIC_DNS, AppConfig.DNS_DIRECT)
+        MmkvManager.encodeSettings(AppConfig.PREF_LOCAL_DNS_ENABLED, true)
+        MmkvManager.encodeSettings(AppConfig.PREF_SNIFFING_ENABLED, true)
+        MmkvManager.encodeSettings(AppConfig.PREF_MUX_ENABLED, false)
+        MmkvManager.encodeSettings(migrationKey, true)
     }
 
     /**
