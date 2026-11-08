@@ -178,9 +178,12 @@ jobs:
         distribution: 'temurin'
         java-version: '21'
 
-    - name: Provide Keystore
+    - name: Decode Keystore
+      uses: timheuer/base64-to-file@v2.0.0
       id: android_keystore
-      run: echo "filePath=${{ github.workspace }}/keystore/saeidng.jks" >> "$GITHUB_OUTPUT"
+      with:
+        fileName: "android_keystore.jks"
+        encodedString: ${{ secrets.APP_KEYSTORE_BASE64 }}
 
     - name: Build APK
       run: |
