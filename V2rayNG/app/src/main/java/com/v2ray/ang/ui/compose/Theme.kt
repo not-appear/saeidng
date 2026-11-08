@@ -27,15 +27,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+// SaeidNG identity: deep-navy + falcon teal/cyan (from the app icon), replacing
+// upstream's monochrome + orange scheme.
 private val LightColor = lightColorScheme(
-    primary = Color(0xFF000000), // Black
+    primary = Color(0xFF0B7285), // Deep falcon teal
     onPrimary = Color(0xFFFFFFFF), // White
-    primaryContainer = Color(0xFFE0E0E0), // Light Gray
-    onPrimaryContainer = Color(0xFF000000), // Black
-    secondary = Color(0xFFf97910), // Orange
+    primaryContainer = Color(0xFFD3F0EE), // Pale teal
+    onPrimaryContainer = Color(0xFF04342E), // Dark teal
+    secondary = Color(0xFF0277BD), // Sky cyan
     onSecondary = Color(0xFFFFFFFF), // White
-    secondaryContainer = Color(0xFFFFE8D6), // Pale Orange
-    onSecondaryContainer = Color(0xFF2B1700), // Dark Brown
+    secondaryContainer = Color(0xFFD6EFFA), // Pale sky
+    onSecondaryContainer = Color(0xFF06334A), // Dark sky
     tertiary = Color(0xFF009966), // Green
     onTertiary = Color(0xFFFFFFFF), // White
     tertiaryContainer = Color(0xFFA0F2D0), // Light Green
@@ -45,35 +47,37 @@ private val LightColor = lightColorScheme(
     onError = Color(0xFFFFFFFF), // White
     onErrorContainer = Color(0xFF410002), // Dark Red
     background = Color(0xFFFFFFFF), // White
-    onBackground = Color(0xFF1C1B1F), // Near Black
+    onBackground = Color(0xFF0E1B1E), // Near Black
     surface = Color(0xFFFFFFFF), // White
-    onSurface = Color(0xFF1C1B1F), // Near Black
-    surfaceVariant = Color(0xFFE7E0EC), // Light Purple Gray
-    onSurfaceVariant = Color(0xFF49454F), // Dark Gray
-    outline = Color(0xFF79747E), // Medium Gray
-    outlineVariant = Color(0xFFCAC4D0), // Light Gray
-    inverseSurface = Color(0xFF313033), // Dark Gray
-    inverseOnSurface = Color(0xFFF4EFF4), // Very Light Gray
-    inversePrimary = Color(0xFFC0C0C0), // Silver Gray
+    onSurface = Color(0xFF0E1B1E), // Near Black
+    surfaceVariant = Color(0xFFDCE9EA), // Pale aqua gray
+    onSurfaceVariant = Color(0xFF3D4F54), // Dark aqua gray
+    outline = Color(0xFF6E838A), // Medium aqua gray
+    outlineVariant = Color(0xFFC2D2D6), // Light aqua gray
+    inverseSurface = Color(0xFF0A1A26), // Icon navy
+    inverseOnSurface = Color(0xFFEAF6F6), // Very light aqua
+    inversePrimary = Color(0xFF5EEAD4), // Bright teal
     scrim = Color(0xFF000000), // Black
-    surfaceTint = Color(0xFF000000), // Black
+    surfaceTint = Color(0xFF0B7285), // Deep falcon teal
     surfaceContainerLowest = Color(0xFFFFFFFF), // White
-    surfaceContainerLow = Color(0xFFF7F7F7), // Very Light Gray
-    surfaceContainer = Color(0xFFF1F1F1), // Light Gray
-    surfaceContainerHigh = Color(0xFFEBEBEB), // Light Gray
-    surfaceContainerHighest = Color(0xFFE5E5E5), // Light Gray
+    surfaceContainerLow = Color(0xFFF4F9F9), // Faint aqua
+    surfaceContainer = Color(0xFFEDF4F4), // Faint aqua
+    surfaceContainerHigh = Color(0xFFE4EDED), // Faint aqua
+    surfaceContainerHighest = Color(0xFFD9E6E6), // Faint aqua
 )
 
+// SaeidNG dark identity: true AMOLED black with navy-tinted containers and the
+// falcon's teal-to-cyan accents; made for an always-dark phone.
 private val DarkColor = darkColorScheme(
-    primary = Color(0xFFC0C0C0), // Silver Gray
-    onPrimary = Color(0xFF303030), // Dark Gray
-    primaryContainer = Color(0xFF474747), // Gray
-    onPrimaryContainer = Color(0xFFE0E0E0), // Light Gray
-    secondary = Color(0xFFf97910), // Orange
-    onSecondary = Color(0xFF4E2600), // Dark Brown
-    secondaryContainer = Color(0xFF6F3800), // Brown
-    onSecondaryContainer = Color(0xFFFFE8D6), // Pale Orange
-    tertiary = Color(0xFF83D6B5), // Mint Green
+    primary = Color(0xFF3AE2C6), // Falcon teal
+    onPrimary = Color(0xFF00201A), // Near-black teal
+    primaryContainer = Color(0xFF0B3B3A), // Deep teal
+    onPrimaryContainer = Color(0xFFA7F3E7), // Pale teal
+    secondary = Color(0xFF53C7F0), // Falcon sky cyan
+    onSecondary = Color(0xFF062A3A), // Dark sky
+    secondaryContainer = Color(0xFF0C3547), // Deep sky
+    onSecondaryContainer = Color(0xFFC4E9FA), // Pale sky
+    tertiary = Color(0xFF7FE0B2), // Mint
     onTertiary = Color(0xFF00382E), // Dark Teal
     tertiaryContainer = Color(0xFF005143), // Teal
     onTertiaryContainer = Color(0xFFA0F2D0), // Light Green
@@ -81,35 +85,35 @@ private val DarkColor = darkColorScheme(
     errorContainer = Color(0xFF93000A), // Dark Red
     onError = Color(0xFF690005), // Deep Red
     onErrorContainer = Color(0xFFFFDAD6), // Light Red
-    background = Color(0xFF1C1B1F), // Near Black
-    onBackground = Color(0xFFE6E1E5), // Light Gray
-    surface = Color(0xFF1C1B1F), // Near Black
-    onSurface = Color(0xFFE6E1E5), // Light Gray
-    surfaceVariant = Color(0xFF49454F), // Dark Gray
-    onSurfaceVariant = Color(0xFFCAC4D0), // Light Gray
-    outline = Color(0xFF938F99), // Grayish Purple
-    outlineVariant = Color(0xFF49454F), // Dark Gray
-    inverseSurface = Color(0xFFE6E1E5), // Light Gray
-    inverseOnSurface = Color(0xFF1C1B1F), // Near Black
-    inversePrimary = Color(0xFF000000), // Black
+    background = Color(0xFF000000), // True black (AMOLED)
+    onBackground = Color(0xFFE8F1F2), // Pale aqua white
+    surface = Color(0xFF000000), // True black (AMOLED)
+    onSurface = Color(0xFFE8F1F2), // Pale aqua white
+    surfaceVariant = Color(0xFF1B2A33), // Navy gray
+    onSurfaceVariant = Color(0xFFA9BCC2), // Muted aqua gray
+    outline = Color(0xFF3D5561), // Aqua slate
+    outlineVariant = Color(0xFF22333D), // Deep aqua slate
+    inverseSurface = Color(0xFFE6F2F2), // Light aqua
+    inverseOnSurface = Color(0xFF0A1216), // Near black
+    inversePrimary = Color(0xFF00685A), // Deep teal
     scrim = Color(0xFF000000), // Black
-    surfaceTint = Color(0xFFC0C0C0), // Silver Gray
-    surfaceContainerLowest = Color(0xFF0F0F12), // Near Black
-    surfaceContainerLow = Color(0xFF1A191D), // Dark Gray
-    surfaceContainer = Color(0xFF1E1D21), // Dark Gray
-    surfaceContainerHigh = Color(0xFF282729), // Dark Gray
-    surfaceContainerHighest = Color(0xFF333234), // Dark Gray
+    surfaceTint = Color(0xFF3AE2C6), // Falcon teal
+    surfaceContainerLowest = Color(0xFF000000), // True black
+    surfaceContainerLow = Color(0xFF050A0E), // Black navy
+    surfaceContainer = Color(0xFF0A1219), // Black navy
+    surfaceContainerHigh = Color(0xFF0E1A24), // Icon-navy tint
+    surfaceContainerHighest = Color(0xFF14242F), // Icon-navy tint
 )
 
 // Semantic Colors
-val colorPing = Color(0xFF009966) // Green
-val colorPingRed = Color(0xFFFF0099) // Pink Red
-val colorConfigType = Color(0xFFf97910) // Orange
-val colorFabActive = Color(0xFFf97910) // Orange
+val colorPing = Color(0xFF00C853) // Green
+val colorPingRed = Color(0xFFFF5252) // Red
+val colorConfigType = Color(0xFF38BDF8) // Falcon sky
+val colorFabActive = Color(0xFF12C9A8) // Falcon teal
 val colorFabInactiveLight = Color(0xFF9C9C9C) // Gray
-val colorFabInactiveDark = Color(0xFF646464) // Dark Gray
-val dividerColorLight = Color(0xFFE0E0E0) // Light Gray
-val dividerColorDark = Color(0xFF424242) // Dark Gray
+val colorFabInactiveDark = Color(0xFF3A4A52) // Aqua slate
+val dividerColorLight = Color(0xFFD9E6E6) // Pale aqua
+val dividerColorDark = Color(0xFF22333D) // Deep aqua slate
 
 // Toast Colors 85%
 val toastNormalBgLight = Color(0xD9353A3E) // Dark Gray
@@ -122,12 +126,12 @@ val toastTextColor = Color.White // White
 
 object ThemeManager {
     private val _themeMode = MutableStateFlow(
-        MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0") ?: "0"
+        MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "2") ?: "2"
     )
     val themeMode: StateFlow<String> = _themeMode.asStateFlow()
 
     private val _dynamicColorEnabled = MutableStateFlow(
-        MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, true)
+        MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
     )
     val dynamicColorEnabled: StateFlow<Boolean> = _dynamicColorEnabled.asStateFlow()
 
@@ -143,9 +147,9 @@ object ThemeManager {
 
     fun refresh() {
         _themeMode.value =
-            MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "0") ?: "0"
+            MmkvManager.decodeSettingsString(AppConfig.PREF_UI_MODE_NIGHT, "2") ?: "2"
         _dynamicColorEnabled.value =
-            MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, true)
+            MmkvManager.decodeSettingsBool(AppConfig.PREF_DYNAMIC_COLOR, false)
     }
 }
 
