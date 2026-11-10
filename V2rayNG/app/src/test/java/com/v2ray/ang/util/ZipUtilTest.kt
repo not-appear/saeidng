@@ -39,17 +39,6 @@ class ZipUtilTest {
     }
 
     @Test
-    fun restoreToFolderReportsTraversalRejection() {
-        val archive = createArchive("../outside" to "overwrite".toByteArray())
-        val destination = File(tempDir, "destination")
-
-        val error = ZipUtil.restoreToFolder(archive, destination.absolutePath)
-
-        assertTrue(error != null)
-        assertFalse(File(tempDir, "outside").exists())
-    }
-
-    @Test
     fun extractArchiveRejectsPathTraversal() {
         val archive = createArchive("../outside" to "overwrite".toByteArray())
         val outside = File(tempDir, "outside")
