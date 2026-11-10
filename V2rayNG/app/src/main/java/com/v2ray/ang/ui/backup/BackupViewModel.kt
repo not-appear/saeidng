@@ -81,12 +81,12 @@ class BackupViewModel(application: Application) : BaseViewModel(application) {
 
     fun restoreConfiguration(cacheDir: File, zipFile: File) {
         launchLoading {
-            val success = performRestore(cacheDir, zipFile)
-            if (success) {
+            val error = performRestore(cacheDir, zipFile)
+            if (error == null) {
                 toastSuccess(R.string.toast_success)
                 _viewModelEvent.send(BackupViewModelEvent.RestoreSuccess)
             } else {
-                toastError(R.string.toast_failure)
+                toastError(error)
             }
         }
     }
@@ -149,11 +149,12 @@ class BackupViewModel(application: Application) : BaseViewModel(application) {
                     return@launchLoading
                 }
 
-                if (performRestore(cacheDir, target)) {
+                val restoreError = performRestore(cacheDir, target)
+                if (restoreError == null) {
                     toastSuccess(R.string.toast_success)
                     _viewModelEvent.send(BackupViewModelEvent.RestoreSuccess)
                 } else {
-                    toastError(R.string.toast_failure)
+                    toastError(restoreError)
                 }
             } catch (e: Exception) {
                 LogUtil.e(AppConfig.TAG, "WebDAV download error", e)
@@ -185,18 +186,21 @@ class BackupViewModel(application: Application) : BaseViewModel(application) {
         }
     }
 
-    private suspend fun performRestore(cacheDir: File, zipFile: File): Boolean =
+    /* Returns null on success, or the reason the restore failed, so the UI can
+       show the real cause instead of a generic failure. */
+    private suspend fun performRestore(cacheDir: File, zipFile: File): String? =
         withContext(Dispatchers.IO) {
             val backupDir = File(cacheDir, "restore_${System.nanoTime()}")
             try {
-                if (!ZipUtil.unzipToFolder(zipFile, backupDir.absolutePath)) {
-                    return@withContext false
-                }
+                ZipUtil.restoreToFolder(zipFile, backupDir.absolutePath)?.let { return@withContext it }
 
                 val count = MMKV.restoreAllFromDirectory(backupDir.absolutePath)
+                if (count <= 0) {
+                    return@withContext getString(R.string.toast_failure)
+                }
                 SettingsChangeManager.makeSetupGroupTab()
                 SettingsChangeManager.makeRestartService()
-                count > 0
+                null
             } finally {
                 backupDir.deleteRecursively()
             }

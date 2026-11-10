@@ -16,12 +16,19 @@ object ZipUtil {
     private const val BUFFER_SIZE = 4096
     private const val MEBIBYTE = 1024L * 1024L
 
+    /* SaeidNG: the size/ratio caps are raised far above upstream's zip-bomb
+       hardening (PR #6134). MMKV stores are append-only, so an owner with many
+       subscriptions ends up with large, massively duplicated store files that
+       compress extremely well — upstream's caps rejected the app's own
+       legitimate backups on restore. The protective checks of that fix stay in
+       force unchanged: path traversal, duplicate destinations, unsupported
+       compression methods and entries below files are still rejected. */
     private val DEFAULT_EXTRACTION_LIMITS = ExtractionLimits(
-        maxArchiveBytes = 128L * MEBIBYTE,
-        maxEntries = 32,
-        maxEntryBytes = 128L * MEBIBYTE,
-        maxTotalBytes = 256L * MEBIBYTE,
-        maxCompressionRatio = 1000.0,
+        maxArchiveBytes = 512L * MEBIBYTE,
+        maxEntries = 128,
+        maxEntryBytes = 512L * MEBIBYTE,
+        maxTotalBytes = 2048L * MEBIBYTE,
+        maxCompressionRatio = 100000.0,
     )
 
     internal class ExtractionLimits(
@@ -104,12 +111,23 @@ object ZipUtil {
      */
     @Throws(IOException::class)
     fun unzipToFolder(zipFile: File, destDirectory: String): Boolean {
+        return restoreToFolder(zipFile, destDirectory) == null
+    }
+
+    /**
+     * Extract an archive like [unzipToFolder], but report why it was rejected
+     * so the caller can show the owner the real reason instead of a generic
+     * failure.
+     *
+     * @return null on success, otherwise a short description of the failure.
+     */
+    fun restoreToFolder(zipFile: File, destDirectory: String): String? {
         return try {
             extractArchive(zipFile, File(destDirectory), DEFAULT_EXTRACTION_LIMITS)
-            true
+            null
         } catch (e: Exception) {
             LogUtil.e(AppConfig.TAG, "Failed to unzip file", e)
-            false
+            e.message ?: e.javaClass.simpleName
         }
     }
 
