@@ -26,6 +26,30 @@ class ZipUtilTest {
     }
 
     @Test
+    fun unzipToFolderAcceptsHighlyCompressibleBackupLikeEntry() {
+        // MMKV stores of an owner with many subscriptions hold large amounts of
+        // repeated, highly compressible data; upstream's zip-bomb ratio cap
+        // rejected such legitimate backups, so the raised default limits used
+        // by unzipToFolder must accept them.
+        val archive = createArchive("MAIN" to ByteArray(4 * 1024 * 1024))
+        val destination = File(tempDir, "destination")
+
+        assertTrue(ZipUtil.unzipToFolder(archive, destination.absolutePath))
+        assertEquals(4L * 1024 * 1024, File(destination, "MAIN").length())
+    }
+
+    @Test
+    fun restoreToFolderReportsTraversalRejection() {
+        val archive = createArchive("../outside" to "overwrite".toByteArray())
+        val destination = File(tempDir, "destination")
+
+        val error = ZipUtil.restoreToFolder(archive, destination.absolutePath)
+
+        assertTrue(error != null)
+        assertFalse(File(tempDir, "outside").exists())
+    }
+
+    @Test
     fun extractArchiveRejectsPathTraversal() {
         val archive = createArchive("../outside" to "overwrite".toByteArray())
         val outside = File(tempDir, "outside")
